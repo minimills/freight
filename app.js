@@ -102,6 +102,7 @@ function calculate() {
   const subtotal = cargoValue + freight + insurance + brokerFees + handling;
   const freightSubtotal = subtotal - cargoValue;
   const breakdownTotal = subtotal;
+  const totalIncome = breakdownTotal * (1 + marginPct / 100);
   const freightChargeable = freightSubtotal * (1 + marginPct / 100);
 
   const invoiceTotal = num(el.invoiceTotal);
@@ -109,7 +110,11 @@ function calculate() {
 
   document.getElementById("handlingRateLabel").textContent = `$${rate}/unit`;
 
-  const set = (id, val) => (document.getElementById(id).textContent = formatCurrency(val, currency));
+  const set = (id, val) => {
+    const node = document.getElementById(id);
+    node.textContent = formatCurrency(val, currency);
+    node.dataset.raw = val.toFixed(2);
+  };
   set("r-cargoValue", cargoValue);
   set("r-freight", freight);
   set("r-insurance", insurance);
@@ -118,9 +123,11 @@ function calculate() {
   set("r-subtotal", subtotal);
   set("r-freightSubtotal", freightSubtotal);
   set("r-breakdownTotal", breakdownTotal);
+  set("r-totalIncome", totalIncome);
   set("r-freightChargeable", freightChargeable);
   set("r-diff", diff);
   document.getElementById("r-marginPct").textContent = marginPct;
+  document.getElementById("r-marginPct2").textContent = marginPct;
 
   const diffRow = document.getElementById("r-diffRow");
   diffRow.classList.toggle("positive", diff >= 0);
@@ -196,7 +203,7 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const target = document.getElementById(btn.dataset.copyTarget);
     try {
-      await copyText(target.textContent.trim());
+      await copyText(target.dataset.raw ?? target.textContent.trim());
       btn.classList.add("copied");
       setTimeout(() => btn.classList.remove("copied"), 1200);
     } catch {

@@ -173,6 +173,19 @@ el.margin.addEventListener("input", () => {
   })
 );
 
+document.querySelectorAll(".copy-btn").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const target = document.getElementById(btn.dataset.copyTarget);
+    try {
+      await navigator.clipboard.writeText(target.textContent.trim());
+      btn.classList.add("copied");
+      setTimeout(() => btn.classList.remove("copied"), 1200);
+    } catch {
+      // Clipboard API unavailable — ignore.
+    }
+  });
+});
+
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);
 ids.forEach((id) => el[id].addEventListener("input", calculate));
 updateInsurance();

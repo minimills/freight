@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Shipping Agent</title>
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="index.html" class="navbar-brand-link">
+        <span class="navbar-logo">FM</span>
+        <span>Freight Multitool</span>
+      </a>
+    </div>
+    <ul class="navbar-links">
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="freight.html">Cost Breakdown</a></li>
+      <li><a href="convert.html">Unit Converter</a></li>
+      <li><a href="email.html" class="active">Email Agent</a></li>
+    </ul>
+  </nav>
+
+  <div class="app">
+    <header class="app-header">
+      <h1>Email Shipping Agent</h1>
+      <p class="subtitle">Fill in shipment details and generate a quote request email</p>
+    </header>
+
+    <main class="layout">
+      <section class="card form-card">
+        <h2 class="section-title">Agent &amp; Shipment</h2>
+        <section class="field-group">
+          <div class="field">
+            <label for="agentSelect">Agent</label>
+            <select id="agentSelect">
+              <option value="Nicole MacDonald">Nicole MacDonald</option>
+              <option value="new">New Agent…</option>
+            </select>
+          </div>
+          <div class="field" id="newAgentField" hidden>
+            <label for="newAgentName">Agent Name</label>
+            <input type="text" id="newAgentName" placeholder="Agent full name">
+          </div>
+          <div class="field">
+            <label for="greeting">Greeting</label>
+            <select id="greeting">
+              <option value="Hi">Hi</option>
+              <option value="Hello">Hello</option>
+              <option value="Dear">Dear</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="shipmentType">Shipment Type</label>
+            <select id="shipmentType">
+              <option value="LTL">LTL</option>
+              <option value="FTL">FTL</option>
+              <option value="LCL">LCL</option>
+              <option value="FCL">FCL</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="originState">Origin State/Province</label>
+            <input type="text" id="originState" placeholder="e.g. ON">
+          </div>
+          <div class="field">
+            <label for="destinationState">Destination State/Province</label>
+            <input type="text" id="destinationState" placeholder="e.g. NY">
+          </div>
+        </section>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Pick Up &amp; Delivery</h2>
+        <section class="field-group">
+          <div class="field">
+            <label for="pickupType">Pick Up</label>
+            <select id="pickupType">
+              <option value="ourAddress">Our Address</option>
+              <option value="new">Type New Address</option>
+            </select>
+          </div>
+          <div class="field" id="ourAddressField">
+            <label for="ourAddress">Our Address (saved)</label>
+            <textarea id="ourAddress" rows="2" placeholder="Set your default pickup address — it's saved for next time"></textarea>
+          </div>
+          <div class="field" id="newPickupField" hidden>
+            <label for="newPickupAddress">Pick Up Address</label>
+            <textarea id="newPickupAddress" rows="2" placeholder="Street, city, state/province, postal code"></textarea>
+          </div>
+          <div class="field full-width">
+            <label for="deliveryAddress">Delivery Address</label>
+            <textarea id="deliveryAddress" rows="2" placeholder="Street, city, state/province, postal code"></textarea>
+          </div>
+        </section>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Consignee</h2>
+        <section class="field-group three-col">
+          <div class="field">
+            <label for="consigneeName">Consignee Name</label>
+            <input type="text" id="consigneeName">
+          </div>
+          <div class="field">
+            <label for="consigneePhone">Consignee Phone</label>
+            <input type="text" id="consigneePhone">
+          </div>
+          <div class="field">
+            <label for="consigneeEmail">Consignee Email</label>
+            <input type="email" id="consigneeEmail">
+          </div>
+        </section>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Cargo</h2>
+        <section class="field-group">
+          <div class="field full-width">
+            <label for="commodity">Commodity</label>
+            <input type="text" id="commodity">
+          </div>
+          <div class="field">
+            <label for="weightValue">Weight</label>
+            <input type="number" id="weightValue" min="0" step="any" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="weightUnit">Weight Unit</label>
+            <select id="weightUnit">
+              <option value="kg">kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="field-group three-col">
+          <div class="field">
+            <label for="dimLength">Length</label>
+            <input type="number" id="dimLength" min="0" step="any" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="dimWidth">Width</label>
+            <input type="number" id="dimWidth" min="0" step="any" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="dimHeight">Height</label>
+            <input type="number" id="dimHeight" min="0" step="any" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="dimUnit">Dimension Unit</label>
+            <select id="dimUnit">
+              <option value="cm">cm</option>
+              <option value="in">in</option>
+            </select>
+          </div>
+        </section>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Lift-Gate</h2>
+        <section class="field-group">
+          <div class="field">
+            <label for="liftgateOrigin">Lift-gate at Origin</label>
+            <select id="liftgateOrigin">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="liftgateDestination">Lift-gate at Destination</label>
+            <select id="liftgateDestination">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+        </section>
+      </section>
+
+      <section class="card results-card">
+        <h2 class="section-title">Generated Email</h2>
+
+        <div class="field">
+          <label>Subject</label>
+          <div class="value-with-copy email-subject-row">
+            <span id="emailSubject" class="email-subject"></span>
+            <button type="button" class="copy-btn" id="copySubjectBtn" title="Copy subject">⧉</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top: 16px;">
+          <label>Body</label>
+          <pre id="emailBody" class="email-body"></pre>
+        </div>
+
+        <button type="button" id="copyBodyBtn" class="btn btn-primary copy-body-btn">Copy Email Body</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="email.js?v=1"></script>
+</body>
+</html>

@@ -171,6 +171,10 @@ body {
   grid-template-columns: repeat(4, 1fr);
 }
 
+.field.full-width {
+  grid-column: 1 / -1;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -183,20 +187,24 @@ body {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   background: var(--field-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px 12px;
   color: var(--text);
   font-size: 0.95rem;
+  font-family: inherit;
   transition: border-color 0.15s ease;
   outline: none;
   width: 100%;
+  resize: vertical;
 }
 
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   border-color: var(--accent);
 }
 
@@ -481,6 +489,39 @@ body {
   font-size: 0.88rem;
   margin: 0;
   line-height: 1.4;
+}
+
+.email-subject-row {
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  justify-content: space-between;
+}
+
+.email-subject {
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.email-body {
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.copy-body-btn {
+  margin-top: 16px;
+  width: 100%;
 }
 
 .print-only {

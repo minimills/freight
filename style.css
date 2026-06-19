@@ -118,6 +118,62 @@ body {
   border-color: var(--accent);
 }
 
+.input-with-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-with-check input[type="number"] {
+  flex: 1;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.check-label input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quick-buttons button {
+  flex: 1;
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 8px;
+  padding: 7px 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.quick-buttons button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.quick-buttons button.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
 .field input::placeholder {
   color: #4d5a68;
 }
@@ -159,6 +215,12 @@ body {
   padding-top: 12px;
   color: var(--text);
   font-weight: 500;
+}
+
+.result-row.sub-note {
+  font-size: 0.82rem;
+  color: var(--accent);
+  padding: 4px 0 10px;
 }
 
 .result-row.total {

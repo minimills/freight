@@ -77,6 +77,17 @@ function formatCurrency(value, currency) {
   }).format(value);
 }
 
+function calculateInsurance(cargoValue, freight) {
+  const insuredValue = (cargoValue + freight) * 1.1;
+  return Math.max(insuredValue * 0.005, 50);
+}
+
+function updateInsurance() {
+  const cargoValue = parseFloat(el.cargoValue.value) || 0;
+  const freight = parseFloat(el.freight.value) || 0;
+  el.insurance.value = calculateInsurance(cargoValue, freight).toFixed(2);
+}
+
 function calculate() {
   const currency = el.currency.value;
   const rate = RATES[currency];
@@ -89,8 +100,9 @@ function calculate() {
   const marginPct = num(el.margin);
 
   const subtotal = cargoValue + freight + insurance + brokerFees + handling;
-  const marginAmt = subtotal * (marginPct / 100);
-  const breakdownTotal = subtotal + marginAmt;
+  const freightSubtotal = subtotal - cargoValue;
+  const breakdownTotal = subtotal;
+  const freightChargeable = freightSubtotal * (1 + marginPct / 100);
 
   const invoiceTotal = num(el.invoiceTotal);
   const diff = invoiceTotal - breakdownTotal;
@@ -104,8 +116,9 @@ function calculate() {
   set("r-brokerFees", brokerFees);
   set("r-handling", handling);
   set("r-subtotal", subtotal);
-  set("r-marginAmt", marginAmt);
+  set("r-freightSubtotal", freightSubtotal);
   set("r-breakdownTotal", breakdownTotal);
+  set("r-freightChargeable", freightChargeable);
   set("r-diff", diff);
   document.getElementById("r-marginPct").textContent = marginPct;
 
@@ -135,7 +148,33 @@ function updateInvoiceHint() {
   }
 }
 
+const brokerFeesFlat = document.getElementById("brokerFeesFlat");
+brokerFeesFlat.addEventListener("change", () => {
+  el.brokerFees.value = brokerFeesFlat.checked ? "180" : "";
+  calculate();
+});
+
+const marginButtons = document.querySelectorAll(".margin-btn");
+marginButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    el.margin.value = btn.dataset.value;
+    marginButtons.forEach((b) => b.classList.toggle("active", b === btn));
+    calculate();
+  });
+});
+el.margin.addEventListener("input", () => {
+  marginButtons.forEach((b) => b.classList.toggle("active", b.dataset.value === el.margin.value));
+});
+
+[el.cargoValue, el.freight].forEach((input) =>
+  input.addEventListener("input", () => {
+    updateInsurance();
+    calculate();
+  })
+);
+
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);
 ids.forEach((id) => el[id].addEventListener("input", calculate));
+updateInsurance();
 updateInvoiceHint();
 calculate();

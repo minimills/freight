@@ -48,7 +48,13 @@
         </div>
         <div class="field">
           <label for="brokerFees">Broker Fees</label>
-          <input type="number" id="brokerFees" min="0" step="0.01" placeholder="0.00">
+          <div class="input-with-check">
+            <input type="number" id="brokerFees" min="0" step="0.01" placeholder="0.00">
+            <label class="check-label">
+              <input type="checkbox" id="brokerFeesFlat">
+              <span>$180</span>
+            </label>
+          </div>
         </div>
       </section>
 
@@ -68,6 +74,11 @@
         <div class="field">
           <label for="margin">Margin (%)</label>
           <input type="number" id="margin" min="0" step="0.1" placeholder="0">
+          <div class="quick-buttons">
+            <button type="button" class="margin-btn" data-value="10">10%</button>
+            <button type="button" class="margin-btn" data-value="20">20%</button>
+            <button type="button" class="margin-btn" data-value="30">30%</button>
+          </div>
         </div>
       </section>
 
@@ -98,13 +109,17 @@
           <span>Subtotal</span>
           <span id="r-subtotal">$0.00</span>
         </div>
-        <div class="result-row">
-          <span>Margin (<span id="r-marginPct">0</span>%)</span>
-          <span id="r-marginAmt">$0.00</span>
+        <div class="result-row sub-note">
+          <span>Freight Subtotal (excl. cargo value)</span>
+          <span id="r-freightSubtotal">$0.00</span>
         </div>
         <div class="result-row total">
           <span>Total Breakdown Cost</span>
           <span id="r-breakdownTotal">$0.00</span>
+        </div>
+        <div class="result-row sub-note">
+          <span>Freight Subtotal + Margin (<span id="r-marginPct">0</span>%)</span>
+          <span id="r-freightChargeable">$0.00</span>
         </div>
         <div class="result-row diff" id="r-diffRow">
           <span>Invoice − Breakdown Cost</span>

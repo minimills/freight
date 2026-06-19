@@ -1,0 +1,184 @@
+:root {
+  --bg: #0f1419;
+  --card-bg: #1a212b;
+  --field-bg: #222b36;
+  --border: #2c3744;
+  --text: #e8edf2;
+  --text-dim: #8a98a8;
+  --accent: #4f8cff;
+  --accent-dim: #335c99;
+  --positive: #36c98e;
+  --negative: #ef5a6f;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0f1419 0%, #131a23 100%);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.app {
+  width: 100%;
+  max-width: 560px;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+
+.section-title {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 0 0 16px;
+}
+
+.subsection-title {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 18px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rate-tag {
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+}
+
+.field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.field input,
+.field select {
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease;
+  outline: none;
+  width: 100%;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field input::placeholder {
+  color: #4d5a68;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 22px 0;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.result-row.subtotal {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.result-row.total {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 14px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.result-row.diff {
+  margin-top: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--field-bg);
+}
+
+.result-row.diff.positive span:last-child {
+  color: var(--positive);
+}
+
+.result-row.diff.negative span:last-child {
+  color: var(--negative);
+}
+
+@media (max-width: 480px) {
+  .field-group {
+    grid-template-columns: 1fr;
+  }
+}

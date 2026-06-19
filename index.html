@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freight Cost Breakdown</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Freight Cost Breakdown</h1>
+      <p class="subtitle">Calculate margin and cost breakdown for freight invoices</p>
+    </header>
+
+    <main class="card">
+      <section class="field-group">
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="CAD">CAD</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="invoiceTotal">Total Amount on Invoice</label>
+          <input type="number" id="invoiceTotal" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <h2 class="section-title">Breakdown</h2>
+
+      <section class="field-group">
+        <div class="field">
+          <label for="cargoValue">Total Cargo Value</label>
+          <input type="number" id="cargoValue" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="freight">Freight (per quote)</label>
+          <input type="number" id="freight" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="insurance">Insurance</label>
+          <input type="number" id="insurance" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="brokerFees">Broker Fees</label>
+          <input type="number" id="brokerFees" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </section>
+
+      <h3 class="subsection-title">Handling <span id="handlingRateLabel" class="rate-tag">$65/unit</span></h3>
+      <section class="field-group">
+        <div class="field">
+          <label for="hours">Hours</label>
+          <input type="number" id="hours" min="0" step="0.25" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="plywoodSheets"># of Plywood Sheets</label>
+          <input type="number" id="plywoodSheets" min="0" step="1" placeholder="0">
+        </div>
+      </section>
+
+      <section class="field-group">
+        <div class="field">
+          <label for="margin">Margin (%)</label>
+          <input type="number" id="margin" min="0" step="0.1" placeholder="0">
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <section class="results">
+        <div class="result-row">
+          <span>Cargo Value</span>
+          <span id="r-cargoValue">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span>Freight</span>
+          <span id="r-freight">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span>Insurance</span>
+          <span id="r-insurance">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span>Broker Fees</span>
+          <span id="r-brokerFees">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span>Handling</span>
+          <span id="r-handling">$0.00</span>
+        </div>
+        <div class="result-row subtotal">
+          <span>Subtotal</span>
+          <span id="r-subtotal">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span>Margin (<span id="r-marginPct">0</span>%)</span>
+          <span id="r-marginAmt">$0.00</span>
+        </div>
+        <div class="result-row total">
+          <span>Total Breakdown Cost</span>
+          <span id="r-breakdownTotal">$0.00</span>
+        </div>
+        <div class="result-row diff" id="r-diffRow">
+          <span>Invoice − Breakdown Cost</span>
+          <span id="r-diff">$0.00</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

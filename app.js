@@ -264,7 +264,7 @@ function buildPrintHTML() {
   if (currency === "USD") {
     const exchangeRate = parseFloat(el.exchangeRate.value) || 0;
     const cadValue = invoiceTotal * exchangeRate;
-    cadLine = `<div class="p-row p-fx">${currency} | ${formatCurrency(cadValue, "CAD")}</div>`;
+    cadLine = `<div class="p-row p-fx"><strong>${currency}</strong> | ${formatCurrency(cadValue, "CAD")}</div>`;
   }
 
   return `
@@ -282,68 +282,22 @@ function buildPrintHTML() {
     <hr>
     <div class="p-row p-bold">Total Breakdown Cost - ${get("r-breakdownTotal")}</div>
     <hr>
-    <div class="p-row">Freight Subtotal - ${get("r-freightSubtotal")}</div>
     <div class="p-row">Subtotal - ${get("r-subtotal")}</div>
+    <div class="p-row">Freight Subtotal - ${get("r-freightSubtotal")}</div>
     <hr>
     <div class="p-row p-bold">Total Income - ${get("r-totalIncome")}</div>
     <hr>
-    <div class="p-row p-bold">Difference - ${get("r-diff")} (Invoice − Breakdown Cost)</div>
+    <div class="p-row p-bold">Difference (Invoice − Breakdown Cost)</div>
+    <div class="p-row">Profit or loss ${get("r-diff")}</div>
   `;
 }
 
+const printArea = document.getElementById("printArea");
+
 document.getElementById("printBtn").addEventListener("click", () => {
   calculate();
-  const win = window.open("", "_blank");
-  win.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Freight Cost Breakdown</title>
-      <style>
-        @page { size: 4in 6in; margin: 0.25in; }
-        * { box-sizing: border-box; }
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          font-size: 11px;
-          color: #111;
-          margin: 0;
-          padding: 8px;
-        }
-        .p-title {
-          font-size: 16px;
-          font-weight: 700;
-          margin-bottom: 4px;
-        }
-        .p-row {
-          padding: 2px 0;
-        }
-        .p-sub {
-          padding-left: 12px;
-          color: #555;
-          font-size: 10px;
-        }
-        .p-bold {
-          font-weight: 700;
-        }
-        .p-fx {
-          color: #444;
-        }
-        hr {
-          border: none;
-          border-top: 1px solid #ccc;
-          margin: 6px 0;
-        }
-      </style>
-    </head>
-    <body>
-      ${buildPrintHTML()}
-    </body>
-    </html>
-  `);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 300);
+  printArea.innerHTML = buildPrintHTML();
+  window.print();
 });
 
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);

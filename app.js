@@ -173,15 +173,34 @@ el.margin.addEventListener("input", () => {
   })
 );
 
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    document.execCommand("copy");
+  } finally {
+    document.body.removeChild(textarea);
+  }
+  return Promise.resolve();
+}
+
 document.querySelectorAll(".copy-btn").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const target = document.getElementById(btn.dataset.copyTarget);
     try {
-      await navigator.clipboard.writeText(target.textContent.trim());
+      await copyText(target.textContent.trim());
       btn.classList.add("copied");
       setTimeout(() => btn.classList.remove("copied"), 1200);
     } catch {
-      // Clipboard API unavailable — ignore.
+      btn.title = "Copy failed — copy manually";
     }
   });
 });

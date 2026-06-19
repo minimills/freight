@@ -252,6 +252,47 @@ body {
   color: #4d5a68;
 }
 
+.field[hidden] {
+  display: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.btn-secondary {
+  background: var(--field-bg);
+  color: var(--text-dim);
+}
+
+.btn-secondary:hover {
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dim);
+}
+
 .calc-hint {
   font-size: 0.78rem;
   color: var(--accent);

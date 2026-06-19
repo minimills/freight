@@ -1,8 +1,8 @@
 const RATES = { CAD: 65, USD: 50 };
 
 const ids = [
-  "currency", "invoiceTotal", "cargoValue", "freight", "insurance",
-  "brokerFees", "hours", "plywoodSheets", "margin",
+  "currency", "invoiceTotal", "freightType", "exchangeRate", "cargoValue", "freight",
+  "insurance", "brokerFees", "hours", "plywoodSheets", "margin",
 ];
 const el = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 
@@ -212,8 +212,143 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
   });
 });
 
+const exchangeRateField = document.getElementById("exchangeRateField");
+function updateExchangeRateVisibility() {
+  exchangeRateField.hidden = el.currency.value !== "USD";
+}
+el.currency.addEventListener("change", updateExchangeRateVisibility);
+
+const DEFAULTS = {
+  currency: "CAD",
+  invoiceTotal: "",
+  freightType: "LTL",
+  exchangeRate: "1.35",
+  cargoValue: "",
+  freight: "",
+  insurance: "",
+  brokerFees: "",
+  hours: "",
+  plywoodSheets: "",
+  margin: "",
+};
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  ids.forEach((id) => (el[id].value = DEFAULTS[id]));
+  brokerFeesFlat.checked = false;
+  marginButtons.forEach((b) => b.classList.remove("active"));
+  updateExchangeRateVisibility();
+  updateInsurance();
+  updateInvoiceHint();
+  calculate();
+});
+
+function handlingBreakdownText(rate) {
+  const hours = num(el.hours);
+  const sheets = num(el.plywoodSheets);
+  const parts = [];
+  if (hours) parts.push(`${hours} hrs × $${rate}`);
+  if (sheets) parts.push(`${sheets} sheets × $${rate}`);
+  return parts.join(" + ") || "—";
+}
+
+function buildPrintHTML() {
+  const currency = el.currency.value;
+  const rate = RATES[currency];
+  const freightType = el.freightType.value;
+  const marginPct = num(el.margin);
+  const invoiceTotal = num(el.invoiceTotal);
+
+  const get = (id) => document.getElementById(id).textContent;
+
+  let cadLine = "";
+  if (currency === "USD") {
+    const exchangeRate = parseFloat(el.exchangeRate.value) || 0;
+    const cadValue = invoiceTotal * exchangeRate;
+    cadLine = `<div class="p-row p-fx">${currency} | ${formatCurrency(cadValue, "CAD")}</div>`;
+  }
+
+  return `
+    <div class="p-title">${freightType}</div>
+    ${cadLine}
+    <div class="p-row p-bold">Total Amount on Invoice - ${formatCurrency(invoiceTotal, currency)}</div>
+    <hr>
+    <div class="p-row">Cargo - ${get("r-cargoValue")}</div>
+    <div class="p-row">Freight - ${get("r-freight")}</div>
+    <div class="p-row">Insurance - ${get("r-insurance")}</div>
+    <div class="p-row">Broker - ${get("r-brokerFees")}</div>
+    <div class="p-row">Handling - ${get("r-handling")}</div>
+    <div class="p-row p-sub">(${handlingBreakdownText(rate)})</div>
+    <div class="p-row">Margin - ${marginPct}%</div>
+    <hr>
+    <div class="p-row p-bold">Total Breakdown Cost - ${get("r-breakdownTotal")}</div>
+    <hr>
+    <div class="p-row">Freight Subtotal - ${get("r-freightSubtotal")}</div>
+    <div class="p-row">Subtotal - ${get("r-subtotal")}</div>
+    <hr>
+    <div class="p-row p-bold">Total Income - ${get("r-totalIncome")}</div>
+    <hr>
+    <div class="p-row p-bold">Difference - ${get("r-diff")} (Invoice − Breakdown Cost)</div>
+  `;
+}
+
+document.getElementById("printBtn").addEventListener("click", () => {
+  calculate();
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Freight Cost Breakdown</title>
+      <style>
+        @page { size: 4in 6in; margin: 0.25in; }
+        * { box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          font-size: 11px;
+          color: #111;
+          margin: 0;
+          padding: 8px;
+        }
+        .p-title {
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .p-row {
+          padding: 2px 0;
+        }
+        .p-sub {
+          padding-left: 12px;
+          color: #555;
+          font-size: 10px;
+        }
+        .p-bold {
+          font-weight: 700;
+        }
+        .p-fx {
+          color: #444;
+        }
+        hr {
+          border: none;
+          border-top: 1px solid #ccc;
+          margin: 6px 0;
+        }
+      </style>
+    </head>
+    <body>
+      ${buildPrintHTML()}
+    </body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
+});
+
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);
 ids.forEach((id) => el[id].addEventListener("input", calculate));
+updateExchangeRateVisibility();
 updateInsurance();
 updateInvoiceHint();
 calculate();

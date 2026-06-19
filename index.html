@@ -38,6 +38,19 @@
             <input type="text" inputmode="decimal" id="invoiceTotal" placeholder="e.g. 123+123">
             <span class="calc-hint" id="invoiceTotalHint"></span>
           </div>
+          <div class="field">
+            <label for="freightType">Freight Type</label>
+            <select id="freightType">
+              <option value="LTL">LTL</option>
+              <option value="FTL">FTL</option>
+              <option value="LCL">LCL</option>
+              <option value="FCL">FCL</option>
+            </select>
+          </div>
+          <div class="field" id="exchangeRateField" hidden>
+            <label for="exchangeRate">Exchange Rate (USD → CAD)</label>
+            <input type="number" id="exchangeRate" min="0" step="0.0001" value="1.35">
+          </div>
         </section>
 
         <hr class="divider">
@@ -92,6 +105,11 @@
             </div>
           </div>
         </section>
+
+        <div class="action-buttons">
+          <button type="button" id="clearBtn" class="btn btn-secondary">Clear</button>
+          <button type="button" id="printBtn" class="btn btn-primary">Print</button>
+        </div>
       </section>
 
       <section class="card results-card">

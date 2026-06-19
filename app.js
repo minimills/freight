@@ -288,7 +288,7 @@ function buildPrintHTML() {
     <div class="p-row p-bold">Total Income - ${get("r-totalIncome")}</div>
     <hr>
     <div class="p-row p-bold">Difference (Invoice − Breakdown Cost)</div>
-    <div class="p-row">Profit or loss ${get("r-diff")}</div>
+    <div class="p-row">${document.getElementById("r-diff").dataset.raw >= 0 ? "Profit" : "Loss"} ${get("r-diff")}</div>
   `;
 }
 

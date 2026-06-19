@@ -44,6 +44,14 @@ body {
   letter-spacing: -0.01em;
 }
 
+.navbar-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
 .navbar-logo {
   display: inline-flex;
   align-items: center;
@@ -433,6 +441,46 @@ body {
   .field-group.three-col {
     grid-template-columns: 1fr;
   }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.dash-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.dash-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.dash-card-icon {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.dash-card h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+.dash-card p {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .print-only {

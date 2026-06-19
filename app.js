@@ -6,7 +6,68 @@ const ids = [
 ];
 const el = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 
-const num = (input) => parseFloat(input.value) || 0;
+// Safe arithmetic evaluator (+, -, *, /, parentheses) — no eval/Function.
+function evaluateExpression(expr) {
+  const tokens = expr.match(/\d+\.?\d*|\.\d+|[+\-*/()]/g);
+  if (!tokens || tokens.join("") !== expr.replace(/\s+/g, "")) return null;
+
+  let pos = 0;
+  const peek = () => tokens[pos];
+  const next = () => tokens[pos++];
+
+  function parseExpr() {
+    let value = parseTerm();
+    while (peek() === "+" || peek() === "-") {
+      const op = next();
+      const rhs = parseTerm();
+      value = op === "+" ? value + rhs : value - rhs;
+    }
+    return value;
+  }
+
+  function parseTerm() {
+    let value = parseFactor();
+    while (peek() === "*" || peek() === "/") {
+      const op = next();
+      const rhs = parseFactor();
+      value = op === "*" ? value * rhs : value / rhs;
+    }
+    return value;
+  }
+
+  function parseFactor() {
+    if (peek() === "(") {
+      next();
+      const value = parseExpr();
+      if (peek() !== ")") throw new Error("Mismatched parentheses");
+      next();
+      return value;
+    }
+    if (peek() === "-") {
+      next();
+      return -parseFactor();
+    }
+    const token = next();
+    if (token === undefined || Number.isNaN(Number(token))) throw new Error("Invalid token");
+    return Number(token);
+  }
+
+  try {
+    const result = parseExpr();
+    if (pos !== tokens.length || !Number.isFinite(result)) return null;
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+function num(input) {
+  if (input === el.invoiceTotal) {
+    const result = evaluateExpression(input.value.trim());
+    return result === null ? 0 : result;
+  }
+  return parseFloat(input.value) || 0;
+}
 
 function formatCurrency(value, currency) {
   return new Intl.NumberFormat("en-US", {
@@ -53,5 +114,28 @@ function calculate() {
   diffRow.classList.toggle("negative", diff < 0);
 }
 
+function updateInvoiceHint() {
+  const raw = el.invoiceTotal.value.trim();
+  const hint = document.getElementById("invoiceTotalHint");
+  const isExpression = /[+\-*/]/.test(raw.slice(1));
+
+  if (!raw || !isExpression) {
+    hint.textContent = "";
+    hint.classList.remove("error");
+    return;
+  }
+
+  const result = evaluateExpression(raw);
+  if (result === null) {
+    hint.textContent = "Invalid expression";
+    hint.classList.add("error");
+  } else {
+    hint.textContent = `= ${formatCurrency(result, el.currency.value)}`;
+    hint.classList.remove("error");
+  }
+}
+
+el.invoiceTotal.addEventListener("input", updateInvoiceHint);
 ids.forEach((id) => el[id].addEventListener("input", calculate));
+updateInvoiceHint();
 calculate();

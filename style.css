@@ -122,6 +122,16 @@ body {
   color: #4d5a68;
 }
 
+.calc-hint {
+  font-size: 0.78rem;
+  color: var(--accent);
+  min-height: 1em;
+}
+
+.calc-hint.error {
+  color: var(--negative);
+}
+
 .divider {
   border: none;
   border-top: 1px solid var(--border);

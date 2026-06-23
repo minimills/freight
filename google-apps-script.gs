@@ -32,6 +32,10 @@ var SHEET_NAME = "Sheet1";
 // sync with the keys sent by collectRowData() in app.js.
 var HEADERS = [
   "timestamp",
+  "customerName",
+  "quoteNumber",
+  "invoiceNumber",
+  "livingstonRef",
   "currency",
   "exchangeRate",
   "freightType",

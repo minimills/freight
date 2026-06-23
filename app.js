@@ -6,7 +6,8 @@ const RATES = { CAD: 65, USD: 50 };
 const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3iUY3LWQ2BYM5p42eFXd_IJK-WPC0O0Px_oll2LAhTs2DyBI54bDrObPZtTvgj_Y/exec";
 
 const ids = [
-  "currency", "invoiceTotal", "freightType", "exchangeRate", "cargoValue", "freight",
+  "currency", "invoiceTotal", "freightType", "exchangeRate", "customerName", "quoteNumber",
+  "invoiceNumber", "livingstonRef", "cargoValue", "freight",
   "insurance", "brokerFees", "hours", "plywoodSheets", "margin",
 ];
 const el = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
@@ -228,6 +229,10 @@ const DEFAULTS = {
   invoiceTotal: "",
   freightType: "LTL",
   exchangeRate: "1.35",
+  customerName: "",
+  quoteNumber: "",
+  invoiceNumber: "",
+  livingstonRef: "",
   cargoValue: "",
   freight: "",
   insurance: "",
@@ -272,9 +277,20 @@ function buildPrintHTML() {
     cadLine = `<div class="p-row p-fx"><strong>${currency}</strong> | ${formatCurrency(cadValue, "CAD")}</div>`;
   }
 
+  const refLines = [
+    ["Customer", el.customerName.value.trim()],
+    ["Quote #", el.quoteNumber.value.trim()],
+    ["Invoice #", el.invoiceNumber.value.trim()],
+    ["Livingston Ref #", el.livingstonRef.value.trim()],
+  ]
+    .filter(([, value]) => value)
+    .map(([label, value]) => `<div class="p-row p-sub">${label}: ${value}</div>`)
+    .join("");
+
   return `
     <div class="p-title">${freightType}</div>
     ${cadLine}
+    ${refLines}
     <div class="p-row p-bold">Total Amount on Invoice - ${formatCurrency(invoiceTotal, currency)}</div>
     <hr>
     <div class="p-row">Cargo - ${get("r-cargoValue")}</div>
@@ -314,6 +330,10 @@ function collectRowData() {
   const currency = el.currency.value;
   return {
     timestamp: new Date().toISOString(),
+    customerName: el.customerName.value.trim(),
+    quoteNumber: el.quoteNumber.value.trim(),
+    invoiceNumber: el.invoiceNumber.value.trim(),
+    livingstonRef: el.livingstonRef.value.trim(),
     currency,
     exchangeRate: currency === "USD" ? (parseFloat(el.exchangeRate.value) || 0) : "",
     freightType: el.freightType.value,

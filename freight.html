@@ -50,11 +50,34 @@
               <option value="FTL">FTL</option>
               <option value="LCL">LCL</option>
               <option value="FCL">FCL</option>
+              <option value="Air">Air</option>
             </select>
           </div>
           <div class="field" id="exchangeRateField" hidden>
             <label for="exchangeRate">Exchange Rate (USD → CAD)</label>
             <input type="number" id="exchangeRate" min="0" step="0.0001" value="1.35">
+          </div>
+        </section>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Reference Info</h2>
+        <section class="field-group">
+          <div class="field">
+            <label for="customerName">Customer Name</label>
+            <input type="text" id="customerName" placeholder="Customer name">
+          </div>
+          <div class="field">
+            <label for="quoteNumber">Quote #</label>
+            <input type="text" id="quoteNumber" placeholder="Quote #">
+          </div>
+          <div class="field">
+            <label for="invoiceNumber">Invoice #</label>
+            <input type="text" id="invoiceNumber" placeholder="Invoice #">
+          </div>
+          <div class="field">
+            <label for="livingstonRef">Livingston Ref #</label>
+            <input type="text" id="livingstonRef" placeholder="Livingston ref #">
           </div>
         </section>
 
@@ -182,6 +205,6 @@
 
   <div id="printArea" class="print-only"></div>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

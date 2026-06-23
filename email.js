@@ -2,7 +2,7 @@
 // https://www.geoapify.com/ (3,000 requests/day) and paste it below.
 // Restrict the key to your domain in the Geoapify dashboard since it
 // is exposed in client-side code.
-const GEOAPIFY_API_KEY = "";
+const GEOAPIFY_API_KEY = "4c8fa23a870a41c2baf3b8021d3f0283";
 
 // Hardcoded addresses. The select option values are indexes into these.
 const PICKUP_ADDRESSES = [

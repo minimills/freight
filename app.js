@@ -1,5 +1,10 @@
 const RATES = { CAD: 65, USD: 50 };
 
+// Google Sheets logging. Deploy the Apps Script in google-apps-script.gs as a
+// Web App ("Anyone" access) and paste its /exec URL below to enable "Save Data".
+// While blank, the Save Data button shows setup instructions instead.
+const SHEETS_WEBAPP_URL = "";
+
 const ids = [
   "currency", "invoiceTotal", "freightType", "exchangeRate", "cargoValue", "freight",
   "insurance", "brokerFees", "hours", "plywoodSheets", "margin",
@@ -298,6 +303,69 @@ document.getElementById("printBtn").addEventListener("click", () => {
   calculate();
   printArea.innerHTML = buildPrintHTML();
   window.print();
+});
+
+// ---- Save Data to Google Sheets ----
+// Reads the current inputs + computed results into one flat row object whose
+// keys become the sheet's column headers (the Apps Script appends by header).
+function collectRowData() {
+  calculate();
+  const raw = (id) => parseFloat(document.getElementById(id).dataset.raw) || 0;
+  const currency = el.currency.value;
+  return {
+    timestamp: new Date().toISOString(),
+    currency,
+    exchangeRate: currency === "USD" ? (parseFloat(el.exchangeRate.value) || 0) : "",
+    freightType: el.freightType.value,
+    invoiceTotal: num(el.invoiceTotal),
+    cargoValue: raw("r-cargoValue"),
+    freight: raw("r-freight"),
+    insurance: raw("r-insurance"),
+    brokerFees: raw("r-brokerFees"),
+    hours: num(el.hours),
+    plywoodSheets: num(el.plywoodSheets),
+    handling: raw("r-handling"),
+    marginPct: num(el.margin),
+    subtotal: raw("r-subtotal"),
+    freightSubtotal: raw("r-freightSubtotal"),
+    breakdownTotal: raw("r-breakdownTotal"),
+    totalIncome: raw("r-totalIncome"),
+    freightChargeable: raw("r-freightChargeable"),
+    diff: raw("r-diff"),
+  };
+}
+
+const saveBtn = document.getElementById("saveBtn");
+const saveStatus = document.getElementById("saveStatus");
+
+function showStatus(message, kind) {
+  saveStatus.textContent = message;
+  saveStatus.className = "save-status" + (kind ? " " + kind : "");
+}
+
+saveBtn.addEventListener("click", async () => {
+  if (!SHEETS_WEBAPP_URL) {
+    showStatus("Not connected yet — paste your Google Apps Script Web App URL into SHEETS_WEBAPP_URL in app.js (see google-apps-script.gs for setup).", "error");
+    return;
+  }
+  const data = collectRowData();
+  saveBtn.disabled = true;
+  showStatus("Saving…", "");
+  try {
+    // Apps Script Web Apps don't return CORS headers, so we POST as a simple
+    // request (text/plain avoids a preflight) and can't read the response.
+    // A resolved fetch means the row was accepted by Google.
+    await fetch(SHEETS_WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data),
+    });
+    showStatus("Saved to Google Sheets ✓", "ok");
+  } catch {
+    showStatus("Save failed — check your connection and the Web App URL.", "error");
+  } finally {
+    saveBtn.disabled = false;
+  }
 });
 
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);

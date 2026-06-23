@@ -347,6 +347,22 @@ body {
   background: var(--accent-dim);
 }
 
+.save-status {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin: 12px 0 0;
+  min-height: 1em;
+  line-height: 1.4;
+}
+
+.save-status.ok {
+  color: var(--positive);
+}
+
+.save-status.error {
+  color: var(--negative);
+}
+
 .calc-hint {
   font-size: 0.78rem;
   color: var(--accent);

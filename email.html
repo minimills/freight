@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Email Shipping Agent</title>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <nav class="navbar">
@@ -74,24 +74,29 @@
 
         <h2 class="section-title">Pick Up &amp; Delivery</h2>
         <section class="field-group">
-          <div class="field">
+          <div class="field full-width">
             <label for="pickupType">Pick Up</label>
             <select id="pickupType">
-              <option value="ourAddress">Our Address</option>
-              <option value="new">Type New Address</option>
+              <option value="0">Belfast Mini Mills Ltd. — 1820 Garfield Road, Belfast. PE. C0A 1A0</option>
+              <option value="new">Type Pick Up Address</option>
             </select>
           </div>
-          <div class="field" id="ourAddressField">
-            <label for="ourAddress">Our Address (saved)</label>
-            <textarea id="ourAddress" rows="2" placeholder="Set your default pickup address — it's saved for next time"></textarea>
-          </div>
-          <div class="field" id="newPickupField" hidden>
+          <div class="field full-width" id="newPickupField" hidden>
             <label for="newPickupAddress">Pick Up Address</label>
-            <textarea id="newPickupAddress" rows="2" placeholder="Street, city, state/province, postal code"></textarea>
+            <input type="text" id="newPickupAddress" class="address-autocomplete" autocomplete="off" placeholder="Start typing an address…">
           </div>
+
           <div class="field full-width">
+            <label for="deliveryType">Delivery</label>
+            <select id="deliveryType">
+              <option value="0">Belfast Mini Mills Ltd. — 1820 Garfield Road, Belfast. PE. C0A 1A0</option>
+              <option value="1">Belfast Mini Mills — 627 Greek River Rd, Murray River, PE C0A 1W0</option>
+              <option value="new">Type Delivery Address</option>
+            </select>
+          </div>
+          <div class="field full-width" id="newDeliveryField" hidden>
             <label for="deliveryAddress">Delivery Address</label>
-            <textarea id="deliveryAddress" rows="2" placeholder="Street, city, state/province, postal code"></textarea>
+            <input type="text" id="deliveryAddress" class="address-autocomplete" autocomplete="off" placeholder="Start typing an address…">
           </div>
         </section>
 
@@ -198,6 +203,6 @@
     </main>
   </div>
 
-  <script src="email.js?v=1"></script>
+  <script src="email.js?v=2"></script>
 </body>
 </html>

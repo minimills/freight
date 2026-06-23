@@ -1,4 +1,17 @@
-const STORAGE_KEY = "freightTool.ourAddress";
+// Geoapify address autocomplete — sign up for a free key at
+// https://www.geoapify.com/ (3,000 requests/day) and paste it below.
+// Restrict the key to your domain in the Geoapify dashboard since it
+// is exposed in client-side code.
+const GEOAPIFY_API_KEY = "";
+
+// Hardcoded addresses. The select option values are indexes into these.
+const PICKUP_ADDRESSES = [
+  "Belfast Mini Mills Ltd. 1820 Garfield Road, Belfast. PE. C0A 1A0",
+];
+const DELIVERY_ADDRESSES = [
+  "Belfast Mini Mills Ltd. 1820 Garfield Road, Belfast. PE. C0A 1A0",
+  "Belfast Mini Mills 627 Greek River Rd, Murray River, PE C0A 1W0",
+];
 
 const el = {
   agentSelect: document.getElementById("agentSelect"),
@@ -9,10 +22,10 @@ const el = {
   originState: document.getElementById("originState"),
   destinationState: document.getElementById("destinationState"),
   pickupType: document.getElementById("pickupType"),
-  ourAddressField: document.getElementById("ourAddressField"),
-  ourAddress: document.getElementById("ourAddress"),
   newPickupField: document.getElementById("newPickupField"),
   newPickupAddress: document.getElementById("newPickupAddress"),
+  deliveryType: document.getElementById("deliveryType"),
+  newDeliveryField: document.getElementById("newDeliveryField"),
   deliveryAddress: document.getElementById("deliveryAddress"),
   consigneeName: document.getElementById("consigneeName"),
   consigneePhone: document.getElementById("consigneePhone"),
@@ -28,12 +41,6 @@ const el = {
   liftgateDestination: document.getElementById("liftgateDestination"),
 };
 
-el.ourAddress.value = localStorage.getItem(STORAGE_KEY) || "";
-el.ourAddress.addEventListener("input", () => {
-  localStorage.setItem(STORAGE_KEY, el.ourAddress.value);
-  render();
-});
-
 function updateAgentVisibility() {
   el.newAgentField.hidden = el.agentSelect.value !== "new";
 }
@@ -43,12 +50,18 @@ el.agentSelect.addEventListener("change", () => {
 });
 
 function updatePickupVisibility() {
-  const isNew = el.pickupType.value === "new";
-  el.ourAddressField.hidden = isNew;
-  el.newPickupField.hidden = !isNew;
+  el.newPickupField.hidden = el.pickupType.value !== "new";
 }
 el.pickupType.addEventListener("change", () => {
   updatePickupVisibility();
+  render();
+});
+
+function updateDeliveryVisibility() {
+  el.newDeliveryField.hidden = el.deliveryType.value !== "new";
+}
+el.deliveryType.addEventListener("change", () => {
+  updateDeliveryVisibility();
   render();
 });
 
@@ -58,7 +71,13 @@ function agentFirstName() {
 }
 
 function pickupAddress() {
-  return el.pickupType.value === "new" ? el.newPickupAddress.value.trim() : el.ourAddress.value.trim();
+  if (el.pickupType.value === "new") return el.newPickupAddress.value.trim();
+  return PICKUP_ADDRESSES[Number(el.pickupType.value)] || "";
+}
+
+function deliveryAddress() {
+  if (el.deliveryType.value === "new") return el.deliveryAddress.value.trim();
+  return DELIVERY_ADDRESSES[Number(el.deliveryType.value)] || "";
 }
 
 function buildSubject() {
@@ -86,7 +105,7 @@ Can you please provide us a quote for an ${shipmentType} to ${destination}.
 
 Pick up: ${pickupAddress()}
 
-Delivery: ${el.deliveryAddress.value.trim()}
+Delivery: ${deliveryAddress()}
 
 Consignee name: ${el.consigneeName.value.trim()}
 Consignee Phone: ${el.consigneePhone.value.trim()}
@@ -149,6 +168,64 @@ document.getElementById("copyBodyBtn").addEventListener("click", async (e) => {
 
 document.querySelectorAll("input, select, textarea").forEach((node) => node.addEventListener("input", render));
 
+// ---- Geoapify address autocomplete ----
+// Attaches a lightweight dropdown of suggestions to an input. Falls back
+// to a plain text field (still fully usable) when no API key is set.
+function attachAutocomplete(input) {
+  if (!GEOAPIFY_API_KEY) return;
+
+  const list = document.createElement("ul");
+  list.className = "autocomplete-list";
+  input.parentNode.appendChild(list);
+
+  let debounce;
+  let controller;
+
+  function close() {
+    list.innerHTML = "";
+    list.classList.remove("open");
+  }
+
+  input.addEventListener("input", () => {
+    const text = input.value.trim();
+    clearTimeout(debounce);
+    if (text.length < 3) {
+      close();
+      return;
+    }
+    debounce = setTimeout(async () => {
+      if (controller) controller.abort();
+      controller = new AbortController();
+      const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(text)}&format=json&limit=5&apiKey=${GEOAPIFY_API_KEY}`;
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        const data = await res.json();
+        list.innerHTML = "";
+        (data.results || []).forEach((r) => {
+          const li = document.createElement("li");
+          li.textContent = r.formatted;
+          li.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            input.value = r.formatted;
+            close();
+            render();
+          });
+          list.appendChild(li);
+        });
+        list.classList.toggle("open", list.children.length > 0);
+      } catch {
+        // Network error or aborted request — ignore.
+      }
+    }, 300);
+  });
+
+  input.addEventListener("blur", () => setTimeout(close, 150));
+}
+
+attachAutocomplete(el.newPickupAddress);
+attachAutocomplete(el.deliveryAddress);
+
 updateAgentVisibility();
 updatePickupVisibility();
+updateDeliveryVisibility();
 render();

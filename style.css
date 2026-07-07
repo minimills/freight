@@ -310,6 +310,60 @@ body {
   display: none;
 }
 
+.checkbox-field {
+  justify-content: flex-end;
+  padding-bottom: 10px;
+}
+
+.cargo-item {
+  display: grid;
+  grid-template-columns: 64px 1.2fr 1.4fr 84px 60px 60px 60px 32px;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.cargo-item .field {
+  min-width: 0;
+}
+
+.ci-remove {
+  height: 38px;
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.ci-remove:hover {
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.add-cargo-btn {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 9px 16px;
+  margin-top: 4px;
+}
+
+@media (max-width: 820px) {
+  .cargo-item {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ci-remove {
+    grid-column: 1 / -1;
+    height: 34px;
+  }
+}
+
 .action-buttons {
   display: flex;
   gap: 12px;

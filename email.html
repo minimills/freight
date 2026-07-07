@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Email Shipping Agent</title>
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <nav class="navbar">
@@ -89,9 +89,9 @@
           <div class="field full-width">
             <label for="deliveryType">Delivery</label>
             <select id="deliveryType">
+              <option value="new" selected>Type Delivery Address</option>
               <option value="0">Belfast Mini Mills Ltd. — 1820 Garfield Road, Belfast. PE. C0A 1A0</option>
               <option value="1">Belfast Mini Mills — 627 Greek River Rd, Murray River, PE C0A 1W0</option>
-              <option value="new">Type Delivery Address</option>
             </select>
           </div>
           <div class="field full-width" id="newDeliveryField" hidden>
@@ -103,6 +103,18 @@
         <hr class="divider">
 
         <h2 class="section-title">Consignee</h2>
+        <section class="field-group">
+          <div class="field">
+            <label for="businessName">Business Name</label>
+            <input type="text" id="businessName" placeholder="Business name">
+          </div>
+          <div class="field checkbox-field">
+            <label class="check-label">
+              <input type="checkbox" id="notABusiness">
+              <span>Not a business</span>
+            </label>
+          </div>
+        </section>
         <section class="field-group three-col">
           <div class="field">
             <label for="consigneeName">Consignee Name</label>
@@ -121,45 +133,75 @@
         <hr class="divider">
 
         <h2 class="section-title">Cargo</h2>
-        <section class="field-group">
-          <div class="field full-width">
-            <label for="commodity">Commodity</label>
-            <input type="text" id="commodity">
-          </div>
-          <div class="field">
-            <label for="weightValue">Weight</label>
-            <input type="number" id="weightValue" min="0" step="any" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="weightUnit">Weight Unit</label>
-            <select id="weightUnit">
-              <option value="kg">kg</option>
-              <option value="lb">lb</option>
-            </select>
-          </div>
-        </section>
 
-        <section class="field-group three-col">
-          <div class="field">
-            <label for="dimLength">Length</label>
-            <input type="number" id="dimLength" min="0" step="any" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="dimWidth">Width</label>
-            <input type="number" id="dimWidth" min="0" step="any" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="dimHeight">Height</label>
-            <input type="number" id="dimHeight" min="0" step="any" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="dimUnit">Dimension Unit</label>
-            <select id="dimUnit">
-              <option value="cm">cm</option>
-              <option value="in">in</option>
-            </select>
-          </div>
-        </section>
+        <!-- Itemized cargo — LTL / LCL / Air -->
+        <div id="itemizedCargo">
+          <section class="field-group">
+            <div class="field">
+              <label for="weightUnit">Weight Unit</label>
+              <select id="weightUnit">
+                <option value="kg">kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dimUnit">Dimension Unit</label>
+              <select id="dimUnit">
+                <option value="cm">cm</option>
+                <option value="in">in</option>
+              </select>
+            </div>
+          </section>
+
+          <div id="cargoItems"></div>
+
+          <button type="button" id="addCargoBtn" class="btn btn-secondary add-cargo-btn">+ Add Cargo Item</button>
+        </div>
+
+        <!-- Bulk cargo — FTL / FCL -->
+        <div id="bulkCargo" hidden>
+          <section class="field-group">
+            <div class="field full-width">
+              <label for="bulkCommodity">Commodity</label>
+              <input type="text" id="bulkCommodity">
+            </div>
+            <div class="field">
+              <label for="bulkItems">Total # of Items</label>
+              <input type="number" id="bulkItems" min="0" step="1" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="bulkSpace">Space</label>
+              <input type="number" id="bulkSpace" min="0" step="any" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="bulkSpaceUnit">Space Unit</label>
+              <select id="bulkSpaceUnit">
+                <option value="sq ft">sq ft</option>
+                <option value="m³">cubic meter (m³)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="bulkWeight">Total Weight</label>
+              <input type="number" id="bulkWeight" min="0" step="any" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="bulkWeightUnit">Weight Unit</label>
+              <select id="bulkWeightUnit">
+                <option value="kg">kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+            <div class="field full-width" id="containerSizeField">
+              <label for="containerSize">Container Size Required</label>
+              <select id="containerSize">
+                <option value="20' Standard">20' Standard</option>
+                <option value="40' Standard">40' Standard</option>
+                <option value="40' High Cube">40' High Cube</option>
+                <option value="45' High Cube">45' High Cube</option>
+              </select>
+            </div>
+          </section>
+        </div>
 
         <hr class="divider">
 
@@ -203,6 +245,6 @@
     </main>
   </div>
 
-  <script src="email.js?v=2"></script>
+  <script src="email.js?v=3"></script>
 </body>
 </html>

@@ -30,13 +30,17 @@ var SHEET_NAME = "Sheet1";
 
 // Column order. The first save also writes these as a header row. Keep this in
 // sync with the keys sent by collectRowData() in app.js.
+// NOTE: every monetary column below is stored in CAD. USD invoices are
+// converted using exchangeRate before saving; enteredCurrency records what was
+// originally typed in.
 var HEADERS = [
   "timestamp",
+  "shipDate",
   "customerName",
   "quoteNumber",
   "invoiceNumber",
   "livingstonRef",
-  "currency",
+  "enteredCurrency",
   "exchangeRate",
   "freightType",
   "invoiceTotal",
@@ -67,7 +71,18 @@ function doPost(e) {
       sheet.appendRow(HEADERS);
     }
 
-    var row = HEADERS.map(function (key) {
+    // Map values by header NAME (not fixed order) so rows stay aligned even if
+    // the column order changes or new keys are added over time. Any key the
+    // sheet doesn't have a column for yet is appended as a new column.
+    var headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    Object.keys(data).forEach(function (key) {
+      if (headerRow.indexOf(key) === -1) {
+        headerRow.push(key);
+        sheet.getRange(1, headerRow.length).setValue(key);
+      }
+    });
+
+    var row = headerRow.map(function (key) {
       return data[key] === undefined ? "" : data[key];
     });
     sheet.appendRow(row);

@@ -6,7 +6,7 @@ const RATES = { CAD: 65, USD: 50 };
 const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyDYZkHAYHIokbP_InluJFrraj8W5SWFJRBzrDdkGicKDeTJfDqfaUV-GH8-ufNSHH26Q/exec";
 
 const ids = [
-  "currency", "invoiceTotal", "freightType", "exchangeRate", "customerName", "quoteNumber",
+  "currency", "invoiceTotal", "freightType", "exchangeRate", "shipDate", "customerName", "quoteNumber",
   "invoiceNumber", "livingstonRef", "cargoValue", "freight",
   "insurance", "brokerFees", "hours", "plywoodSheets", "margin",
 ];
@@ -229,6 +229,7 @@ const DEFAULTS = {
   invoiceTotal: "",
   freightType: "LTL",
   exchangeRate: "1.35",
+  shipDate: "",
   customerName: "",
   quoteNumber: "",
   invoiceNumber: "",
@@ -278,6 +279,7 @@ function buildPrintHTML() {
   }
 
   const refLines = [
+    ["Ship Date", el.shipDate.value],
     ["Customer", el.customerName.value.trim()],
     ["Quote #", el.quoteNumber.value.trim()],
     ["Invoice #", el.invoiceNumber.value.trim()],
@@ -326,32 +328,37 @@ document.getElementById("printBtn").addEventListener("click", () => {
 // keys become the sheet's column headers (the Apps Script appends by header).
 function collectRowData() {
   calculate();
-  const raw = (id) => parseFloat(document.getElementById(id).dataset.raw) || 0;
   const currency = el.currency.value;
+  // All monetary values are stored in CAD. When the invoice is entered in USD,
+  // multiply money amounts by the exchange rate before saving. Non-money fields
+  // (hours, sheets, margin %) are left as-is.
+  const rate = currency === "USD" ? (parseFloat(el.exchangeRate.value) || 0) : 1;
+  const cad = (id) => (parseFloat(document.getElementById(id).dataset.raw) || 0) * rate;
   return {
     timestamp: new Date().toISOString(),
+    shipDate: el.shipDate.value,
     customerName: el.customerName.value.trim(),
     quoteNumber: el.quoteNumber.value.trim(),
     invoiceNumber: el.invoiceNumber.value.trim(),
     livingstonRef: el.livingstonRef.value.trim(),
-    currency,
-    exchangeRate: currency === "USD" ? (parseFloat(el.exchangeRate.value) || 0) : "",
+    enteredCurrency: currency,
+    exchangeRate: currency === "USD" ? rate : "",
     freightType: el.freightType.value,
-    invoiceTotal: num(el.invoiceTotal),
-    cargoValue: raw("r-cargoValue"),
-    freight: raw("r-freight"),
-    insurance: raw("r-insurance"),
-    brokerFees: raw("r-brokerFees"),
+    invoiceTotal: num(el.invoiceTotal) * rate,
+    cargoValue: cad("r-cargoValue"),
+    freight: cad("r-freight"),
+    insurance: cad("r-insurance"),
+    brokerFees: cad("r-brokerFees"),
     hours: num(el.hours),
     plywoodSheets: num(el.plywoodSheets),
-    handling: raw("r-handling"),
+    handling: cad("r-handling"),
     marginPct: num(el.margin),
-    subtotal: raw("r-subtotal"),
-    freightSubtotal: raw("r-freightSubtotal"),
-    breakdownTotal: raw("r-breakdownTotal"),
-    totalIncome: raw("r-totalIncome"),
-    freightChargeable: raw("r-freightChargeable"),
-    diff: raw("r-diff"),
+    subtotal: cad("r-subtotal"),
+    freightSubtotal: cad("r-freightSubtotal"),
+    breakdownTotal: cad("r-breakdownTotal"),
+    totalIncome: cad("r-totalIncome"),
+    freightChargeable: cad("r-freightChargeable"),
+    diff: cad("r-diff"),
   };
 }
 

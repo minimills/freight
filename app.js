@@ -296,6 +296,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   updateInsurance();
   updateInvoiceHint();
   calculate();
+  setEditingRow(null);
 });
 
 function handlingBreakdownText() {
@@ -413,11 +414,33 @@ function collectRowData() {
 }
 
 const saveBtn = document.getElementById("saveBtn");
+const updateBtn = document.getElementById("updateBtn");
 const saveStatus = document.getElementById("saveStatus");
+
+// Sheet row of the record currently loaded for editing (null = new entry).
+let currentRow = null;
+let currentRecord = null;
+
+function setEditingRow(row, record) {
+  currentRow = row || null;
+  currentRecord = record || null;
+  updateBtn.hidden = !currentRow;
+}
 
 function showStatus(message, kind) {
   saveStatus.textContent = message;
   saveStatus.className = "save-status" + (kind ? " " + kind : "");
+}
+
+function postToSheet(data) {
+  // Apps Script Web Apps don't return CORS headers, so we POST as a simple
+  // request (text/plain avoids a preflight) and can't read the response.
+  // A resolved fetch means the row was accepted by Google.
+  return fetch(SHEETS_WEBAPP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(data),
+  });
 }
 
 saveBtn.addEventListener("click", async () => {
@@ -429,19 +452,32 @@ saveBtn.addEventListener("click", async () => {
   saveBtn.disabled = true;
   showStatus("Saving…", "");
   try {
-    // Apps Script Web Apps don't return CORS headers, so we POST as a simple
-    // request (text/plain avoids a preflight) and can't read the response.
-    // A resolved fetch means the row was accepted by Google.
-    await fetch(SHEETS_WEBAPP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(data),
-    });
+    await postToSheet(data);
     showStatus("Saved to Google Sheets ✓", "ok");
   } catch {
     showStatus("Save failed — check your connection and the Web App URL.", "error");
   } finally {
     saveBtn.disabled = false;
+  }
+});
+
+updateBtn.addEventListener("click", async () => {
+  if (!SHEETS_WEBAPP_URL || !currentRow) return;
+  const data = collectRowData();
+  // Overwrite the loaded row rather than appending. Preserve the original
+  // created timestamp and stamp when it was last updated.
+  data._updateRow = currentRow;
+  if (currentRecord && currentRecord.timestamp) data.timestamp = currentRecord.timestamp;
+  data.updatedAt = new Date().toISOString();
+  updateBtn.disabled = true;
+  showStatus("Updating…", "");
+  try {
+    await postToSheet(data);
+    showStatus("Updated the saved record ✓", "ok");
+  } catch {
+    showStatus("Update failed — check your connection and the Web App URL.", "error");
+  } finally {
+    updateBtn.disabled = false;
   }
 });
 
@@ -563,8 +599,9 @@ function prefillFromRecord(r) {
   updateCarrierUI();
   updateInvoiceHint();
   calculate();
+  setEditingRow(r._row, r);
   showStatus(
-    `Loaded ${r.customerName || "record"}${r.invoiceNumber ? " (Inv " + r.invoiceNumber + ")" : ""} — review, then Print.`,
+    `Loaded ${r.customerName || "record"}${r.invoiceNumber ? " (Inv " + r.invoiceNumber + ")" : ""} — review, then Print or Update.`,
     "ok"
   );
 }

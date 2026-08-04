@@ -35,6 +35,7 @@ var SHEET_NAME = "Sheet1";
 // originally typed in.
 var HEADERS = [
   "timestamp",
+  "updatedAt",
   "shipDate",
   "customerName",
   "quoteNumber",
@@ -70,6 +71,11 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
 
+    // When _updateRow is present, overwrite that existing row instead of
+    // appending a new one. It's a control field, not a column to store.
+    var updateRow = data._updateRow;
+    delete data._updateRow;
+
     // Write the header row the first time the sheet is used.
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(HEADERS);
@@ -80,7 +86,7 @@ function doPost(e) {
     // sheet doesn't have a column for yet is appended as a new column.
     var headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     Object.keys(data).forEach(function (key) {
-      if (headerRow.indexOf(key) === -1) {
+      if (key !== "_row" && headerRow.indexOf(key) === -1) {
         headerRow.push(key);
         sheet.getRange(1, headerRow.length).setValue(key);
       }
@@ -89,7 +95,12 @@ function doPost(e) {
     var row = headerRow.map(function (key) {
       return data[key] === undefined ? "" : data[key];
     });
-    sheet.appendRow(row);
+
+    if (updateRow && updateRow > 1 && updateRow <= sheet.getLastRow()) {
+      sheet.getRange(updateRow, 1, 1, row.length).setValues([row]);
+    } else {
+      sheet.appendRow(row);
+    }
 
     return respond({ ok: true }, null);
   } catch (err) {

@@ -7,10 +7,12 @@ const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycby2vI9bjOGSOs
 
 const ids = [
   "currency", "invoiceTotal", "freightType", "exchangeRate", "shipDate", "customerName", "quoteNumber",
-  "invoiceNumber", "livingstonRef", "cargoValue", "freight",
-  "insurance", "brokerFees", "hours", "plywoodSheets", "margin",
+  "invoiceNumber", "refNumber", "carrier", "carrierNew", "subContractor", "cargoValue", "freight",
+  "insurance", "brokerFees", "hourlyRate", "hours", "plywoodRate", "plywoodSheets", "margin",
 ];
 const el = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
+el.carrierNewField = document.getElementById("carrierNewField");
+el.subContractorField = document.getElementById("subContractorField");
 
 // Safe arithmetic evaluator (+, -, *, /, parentheses) — no eval/Function.
 function evaluateExpression(expr) {
@@ -88,21 +90,37 @@ function calculateInsurance(cargoValue, freight) {
   return Math.max(insuredValue * 0.005, 50);
 }
 
+function currentCarrierName() {
+  return el.carrier.value === "new" ? el.carrierNew.value.trim() : el.carrier.value;
+}
+
+function isLivingston() {
+  return currentCarrierName() === "Livingston";
+}
+
+// Insurance is auto-calculated only for Livingston; every other carrier is a
+// manual entry, so we never overwrite what the user typed.
 function updateInsurance() {
+  if (!isLivingston()) return;
   const cargoValue = parseFloat(el.cargoValue.value) || 0;
   const freight = parseFloat(el.freight.value) || 0;
   el.insurance.value = calculateInsurance(cargoValue, freight).toFixed(2);
 }
 
+// Shows/hides the "add new carrier" and Livingston-only sub-contractor fields.
+function updateCarrierUI() {
+  el.carrierNewField.hidden = el.carrier.value !== "new";
+  el.subContractorField.hidden = !isLivingston();
+}
+
 function calculate() {
   const currency = el.currency.value;
-  const rate = RATES[currency];
 
   const cargoValue = num(el.cargoValue);
   const freight = num(el.freight);
   const insurance = num(el.insurance);
   const brokerFees = num(el.brokerFees);
-  const handling = num(el.hours) * rate + num(el.plywoodSheets) * rate;
+  const handling = num(el.hours) * num(el.hourlyRate) + num(el.plywoodSheets) * num(el.plywoodRate);
   const marginPct = num(el.margin);
 
   const subtotal = cargoValue + freight + insurance + brokerFees + handling;
@@ -113,8 +131,6 @@ function calculate() {
 
   const invoiceTotal = num(el.invoiceTotal);
   const diff = invoiceTotal - breakdownTotal;
-
-  document.getElementById("handlingRateLabel").textContent = `$${rate}/unit`;
 
   const set = (id, val) => {
     const node = document.getElementById(id);
@@ -222,7 +238,30 @@ const exchangeRateField = document.getElementById("exchangeRateField");
 function updateExchangeRateVisibility() {
   exchangeRateField.hidden = el.currency.value !== "USD";
 }
-el.currency.addEventListener("change", updateExchangeRateVisibility);
+
+// Handling rates default to the currency's standard rate; changing currency
+// resets them (the user can still override afterwards).
+function applyCurrencyRateDefaults() {
+  el.hourlyRate.value = RATES[el.currency.value];
+  el.plywoodRate.value = RATES[el.currency.value];
+}
+
+el.currency.addEventListener("change", () => {
+  updateExchangeRateVisibility();
+  applyCurrencyRateDefaults();
+  calculate();
+});
+
+el.carrier.addEventListener("change", () => {
+  updateCarrierUI();
+  updateInsurance();
+  calculate();
+});
+el.carrierNew.addEventListener("input", () => {
+  updateCarrierUI();
+  updateInsurance();
+  calculate();
+});
 
 const DEFAULTS = {
   currency: "CAD",
@@ -233,12 +272,17 @@ const DEFAULTS = {
   customerName: "",
   quoteNumber: "",
   invoiceNumber: "",
-  livingstonRef: "",
+  refNumber: "",
+  carrier: "Livingston",
+  carrierNew: "",
+  subContractor: "",
   cargoValue: "",
   freight: "",
   insurance: "",
   brokerFees: "",
+  hourlyRate: String(RATES.CAD),
   hours: "",
+  plywoodRate: String(RATES.CAD),
   plywoodSheets: "",
   margin: "",
 };
@@ -248,23 +292,23 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   brokerFeesFlat.checked = false;
   marginButtons.forEach((b) => b.classList.remove("active"));
   updateExchangeRateVisibility();
+  updateCarrierUI();
   updateInsurance();
   updateInvoiceHint();
   calculate();
 });
 
-function handlingBreakdownText(rate) {
+function handlingBreakdownText() {
   const hours = num(el.hours);
   const sheets = num(el.plywoodSheets);
   const parts = [];
-  if (hours) parts.push(`${hours} hrs × $${rate}`);
-  if (sheets) parts.push(`${sheets} sheets × $${rate}`);
+  if (hours) parts.push(`${hours} hrs × $${num(el.hourlyRate)}`);
+  if (sheets) parts.push(`${sheets} sheets × $${num(el.plywoodRate)}`);
   return parts.join(" + ") || "—";
 }
 
 function buildPrintHTML() {
   const currency = el.currency.value;
-  const rate = RATES[currency];
   const freightType = el.freightType.value;
   const marginPct = num(el.margin);
   const invoiceTotal = num(el.invoiceTotal);
@@ -283,7 +327,9 @@ function buildPrintHTML() {
     ["Customer", el.customerName.value.trim()],
     ["Quote #", el.quoteNumber.value.trim()],
     ["Invoice #", el.invoiceNumber.value.trim()],
-    ["Livingston Ref #", el.livingstonRef.value.trim()],
+    ["Ref #", el.refNumber.value.trim()],
+    ["Carrier", currentCarrierName()],
+    ["Sub-contractor", isLivingston() ? el.subContractor.value.trim() : ""],
   ]
     .filter(([, value]) => value)
     .map(([label, value]) => `<div class="p-row p-sub">${label}: ${value}</div>`)
@@ -300,7 +346,7 @@ function buildPrintHTML() {
     <div class="p-row">Insurance - ${get("r-insurance")}</div>
     <div class="p-row">Broker - ${get("r-brokerFees")}</div>
     <div class="p-row">Handling - ${get("r-handling")}</div>
-    <div class="p-row p-sub">(${handlingBreakdownText(rate)})</div>
+    <div class="p-row p-sub">(${handlingBreakdownText()})</div>
     <div class="p-row">Margin - ${marginPct}%</div>
     <hr>
     <div class="p-row p-bold">Total Breakdown Cost - ${get("r-breakdownTotal")}</div>
@@ -340,7 +386,9 @@ function collectRowData() {
     customerName: el.customerName.value.trim(),
     quoteNumber: el.quoteNumber.value.trim(),
     invoiceNumber: el.invoiceNumber.value.trim(),
-    livingstonRef: el.livingstonRef.value.trim(),
+    refNumber: el.refNumber.value.trim(),
+    carrier: currentCarrierName(),
+    subContractor: isLivingston() ? el.subContractor.value.trim() : "",
     enteredCurrency: currency,
     exchangeRate: currency === "USD" ? rate : "",
     freightType: el.freightType.value,
@@ -349,7 +397,9 @@ function collectRowData() {
     freight: cad("r-freight"),
     insurance: cad("r-insurance"),
     brokerFees: cad("r-brokerFees"),
+    hourlyRate: num(el.hourlyRate) * rate,
     hours: num(el.hours),
+    plywoodRate: num(el.plywoodRate) * rate,
     plywoodSheets: num(el.plywoodSheets),
     handling: cad("r-handling"),
     marginPct: num(el.margin),
@@ -395,9 +445,171 @@ saveBtn.addEventListener("click", async () => {
   }
 });
 
+// ---- Load saved records from Google Sheets ----
+const loadModal = document.getElementById("loadModal");
+const loadList = document.getElementById("loadList");
+const loadSearch = document.getElementById("loadSearch");
+const loadStatus = document.getElementById("loadStatus");
+let loadedRecords = [];
+
+function setLoadStatus(message, kind) {
+  loadStatus.textContent = message || "";
+  loadStatus.className = "save-status" + (kind ? " " + kind : "");
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
+}
+
+// Reading from an Apps Script Web App cross-origin is blocked by CORS, so we
+// use JSONP (a <script> tag with a callback) which isn't subject to it.
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = "__freightCb" + Date.now();
+    const script = document.createElement("script");
+    function cleanup() {
+      delete window[cb];
+      script.remove();
+    }
+    window[cb] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("network"));
+    };
+    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+    document.body.appendChild(script);
+  });
+}
+
+function renderLoadList() {
+  const q = loadSearch.value.trim().toLowerCase();
+  const matches = loadedRecords.filter((r) => {
+    if (!q) return true;
+    return [r.customerName, r.refNumber, r.invoiceNumber, r.quoteNumber, r.carrier]
+      .some((v) => String(v || "").toLowerCase().includes(q));
+  });
+  loadList.innerHTML = "";
+  if (!matches.length) {
+    loadList.innerHTML = '<p class="load-empty">No matching records.</p>';
+    return;
+  }
+  // Newest first.
+  matches.slice().reverse().forEach((r) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "load-item";
+    const money = formatCurrency(parseFloat(r.totalIncome) || 0, "CAD");
+    const subBits = [
+      r.shipDate,
+      r.refNumber ? "Ref " + r.refNumber : "",
+      r.invoiceNumber ? "Inv " + r.invoiceNumber : "",
+      money,
+    ].filter(Boolean).map(escapeHtml).join(" · ");
+    item.innerHTML =
+      `<span class="load-item-main">${escapeHtml(r.customerName || "—")} · ${escapeHtml(r.freightType || "")}</span>` +
+      `<span class="load-item-sub">${subBits}</span>`;
+    item.addEventListener("click", () => {
+      prefillFromRecord(r);
+      closeLoad();
+    });
+    loadList.appendChild(item);
+  });
+}
+
+function prefillFromRecord(r) {
+  const val = (v) => (v === undefined || v === null ? "" : String(v));
+  // Saved amounts are all CAD, so load the form in CAD.
+  el.currency.value = "CAD";
+  el.exchangeRate.value = DEFAULTS.exchangeRate;
+  el.shipDate.value = val(r.shipDate);
+  el.customerName.value = val(r.customerName);
+  el.quoteNumber.value = val(r.quoteNumber);
+  el.invoiceNumber.value = val(r.invoiceNumber);
+  el.refNumber.value = val(r.refNumber !== undefined && r.refNumber !== "" ? r.refNumber : r.livingstonRef);
+
+  const carrier = val(r.carrier);
+  const presets = Array.from(el.carrier.options).map((o) => o.value);
+  if (carrier && presets.includes(carrier)) {
+    el.carrier.value = carrier;
+    el.carrierNew.value = "";
+  } else if (carrier) {
+    el.carrier.value = "new";
+    el.carrierNew.value = carrier;
+  } else {
+    el.carrier.value = "Livingston";
+    el.carrierNew.value = "";
+  }
+  el.subContractor.value = val(r.subContractor);
+  el.freightType.value = val(r.freightType) || "LTL";
+  el.hourlyRate.value = r.hourlyRate !== undefined && r.hourlyRate !== "" ? r.hourlyRate : RATES.CAD;
+  el.plywoodRate.value = r.plywoodRate !== undefined && r.plywoodRate !== "" ? r.plywoodRate : RATES.CAD;
+  el.invoiceTotal.value = val(r.invoiceTotal);
+  el.cargoValue.value = val(r.cargoValue);
+  el.freight.value = val(r.freight);
+  el.insurance.value = val(r.insurance);
+  el.brokerFees.value = val(r.brokerFees);
+  el.hours.value = val(r.hours);
+  el.plywoodSheets.value = val(r.plywoodSheets);
+  el.margin.value = val(r.marginPct);
+
+  brokerFeesFlat.checked = false;
+  marginButtons.forEach((b) => b.classList.toggle("active", b.dataset.value === String(r.marginPct)));
+  updateExchangeRateVisibility();
+  updateCarrierUI();
+  updateInvoiceHint();
+  calculate();
+  showStatus(
+    `Loaded ${r.customerName || "record"}${r.invoiceNumber ? " (Inv " + r.invoiceNumber + ")" : ""} — review, then Print.`,
+    "ok"
+  );
+}
+
+function openLoad() {
+  loadModal.hidden = false;
+  loadSearch.value = "";
+  loadList.innerHTML = "";
+  if (!SHEETS_WEBAPP_URL) {
+    setLoadStatus("Not connected — set SHEETS_WEBAPP_URL in app.js first.", "error");
+    return;
+  }
+  setLoadStatus("Loading…", "");
+  jsonp(SHEETS_WEBAPP_URL)
+    .then((res) => {
+      if (!res || !res.ok) {
+        setLoadStatus("Could not read records from the sheet.", "error");
+        return;
+      }
+      loadedRecords = res.records || [];
+      if (!loadedRecords.length) {
+        setLoadStatus("No saved records yet.", "");
+        return;
+      }
+      setLoadStatus("", "");
+      renderLoadList();
+    })
+    .catch(() => setLoadStatus("Failed to load — check the Web App URL and that it's deployed.", "error"));
+}
+
+function closeLoad() {
+  loadModal.hidden = true;
+}
+
+document.getElementById("loadBtn").addEventListener("click", openLoad);
+document.getElementById("loadCloseBtn").addEventListener("click", closeLoad);
+loadModal.addEventListener("click", (e) => {
+  if (e.target === loadModal) closeLoad();
+});
+loadSearch.addEventListener("input", renderLoadList);
+
 el.invoiceTotal.addEventListener("input", updateInvoiceHint);
 ids.forEach((id) => el[id].addEventListener("input", calculate));
 updateExchangeRateVisibility();
+updateCarrierUI();
 updateInsurance();
 updateInvoiceHint();
 calculate();

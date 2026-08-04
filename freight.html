@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Freight Cost Breakdown</title>
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <nav class="navbar">
@@ -80,8 +80,29 @@
             <input type="text" id="invoiceNumber" placeholder="Invoice #">
           </div>
           <div class="field">
-            <label for="livingstonRef">Livingston Ref #</label>
-            <input type="text" id="livingstonRef" placeholder="Livingston ref #">
+            <label for="refNumber">Ref #</label>
+            <input type="text" id="refNumber" placeholder="Ref #">
+          </div>
+          <div class="field">
+            <label for="carrier">Shipping Company</label>
+            <select id="carrier">
+              <option value="Livingston">Livingston</option>
+              <option value="FedEx">FedEx</option>
+              <option value="UPS">UPS</option>
+              <option value="Purolator">Purolator</option>
+              <option value="Canada Post">Canada Post</option>
+              <option value="Day &amp; Ross">Day &amp; Ross</option>
+              <option value="DHL">DHL</option>
+              <option value="new">Add new…</option>
+            </select>
+          </div>
+          <div class="field" id="carrierNewField" hidden>
+            <label for="carrierNew">New Carrier Name</label>
+            <input type="text" id="carrierNew" placeholder="Carrier name">
+          </div>
+          <div class="field" id="subContractorField">
+            <label for="subContractor">Sub-contractor Carrier</label>
+            <input type="text" id="subContractor" placeholder="Actual carrier used">
           </div>
         </section>
 
@@ -114,11 +135,19 @@
           </div>
         </section>
 
-        <h3 class="subsection-title">Handling <span id="handlingRateLabel" class="rate-tag">$65/unit</span></h3>
-        <section class="field-group">
+        <h3 class="subsection-title">Handling</h3>
+        <section class="field-group three-col">
+          <div class="field">
+            <label for="hourlyRate">Hourly Rate</label>
+            <input type="number" id="hourlyRate" min="0" step="0.01" placeholder="65">
+          </div>
           <div class="field">
             <label for="hours">Hours</label>
             <input type="number" id="hours" min="0" step="0.25" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="plywoodRate">Plywood Rate</label>
+            <input type="number" id="plywoodRate" min="0" step="0.01" placeholder="65">
           </div>
           <div class="field">
             <label for="plywoodSheets"># of Plywood Sheets</label>
@@ -140,6 +169,7 @@
 
         <div class="action-buttons">
           <button type="button" id="clearBtn" class="btn btn-secondary">Clear</button>
+          <button type="button" id="loadBtn" class="btn btn-secondary">Load Saved</button>
           <button type="button" id="saveBtn" class="btn btn-secondary">Save Data</button>
           <button type="button" id="printBtn" class="btn btn-primary">Print</button>
         </div>
@@ -209,6 +239,18 @@
 
   <div id="printArea" class="print-only"></div>
 
-  <script src="app.js?v=6"></script>
+  <div id="loadModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Load Saved Record</h2>
+        <button type="button" id="loadCloseBtn" class="modal-close" title="Close">×</button>
+      </div>
+      <input type="text" id="loadSearch" class="modal-search" placeholder="Search by customer, ref #, invoice #, quote #…">
+      <div id="loadList" class="load-list"></div>
+      <p class="save-status" id="loadStatus"></p>
+    </div>
+  </div>
+
+  <script src="app.js?v=7"></script>
 </body>
 </html>

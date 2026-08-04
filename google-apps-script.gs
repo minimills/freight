@@ -39,7 +39,9 @@ var HEADERS = [
   "customerName",
   "quoteNumber",
   "invoiceNumber",
-  "livingstonRef",
+  "refNumber",
+  "carrier",
+  "subContractor",
   "enteredCurrency",
   "exchangeRate",
   "freightType",
@@ -48,7 +50,9 @@ var HEADERS = [
   "freight",
   "insurance",
   "brokerFees",
+  "hourlyRate",
   "hours",
+  "plywoodRate",
   "plywoodSheets",
   "handling",
   "marginPct",
@@ -87,17 +91,48 @@ function doPost(e) {
     });
     sheet.appendRow(row);
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return respond({ ok: true }, null);
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return respond({ ok: false, error: String(err) }, null);
   }
 }
 
-// Lets you open the /exec URL in a browser to confirm the deployment is live.
-function doGet() {
-  return ContentService.createTextOutput("Freight logger is running.");
+// Returns every saved row as JSON so the Cost Breakdown page can list records
+// and pre-fill the form to edit/print again. Supports JSONP via ?callback= so
+// the browser can read it cross-origin (plain GET is blocked by CORS).
+function doGet(e) {
+  var callback = e && e.parameter ? e.parameter.callback : null;
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    var records = [];
+    if (sheet && sheet.getLastRow() > 1) {
+      var values = sheet.getDataRange().getValues();
+      var headers = values[0];
+      for (var i = 1; i < values.length; i++) {
+        var obj = {};
+        for (var j = 0; j < headers.length; j++) {
+          obj[headers[j]] = values[i][j];
+        }
+        obj._row = i + 1;
+        records.push(obj);
+      }
+    }
+    return respond({ ok: true, records: records }, callback);
+  } catch (err) {
+    return respond({ ok: false, error: String(err) }, callback);
+  }
+}
+
+// Wraps a response as JSONP when a callback name is supplied, otherwise plain
+// JSON.
+function respond(obj, callback) {
+  var json = JSON.stringify(obj);
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + "(" + json + ")")
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
 }

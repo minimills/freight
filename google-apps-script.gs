@@ -28,8 +28,9 @@
 // Tab name to write to. Change if your tab isn't called "Sheet1".
 var SHEET_NAME = "Sheet1";
 
-// Column order. The first save also writes these as a header row. Keep this in
-// sync with the keys sent by collectRowData() in app.js.
+// Reference only: the columns the outgoing Cost Breakdown page sends. Each tab
+// now gets its header row from the keys of the first record it receives, so
+// this list is documentation, not the source of truth.
 // NOTE: every monetary column below is stored in CAD. USD invoices are
 // converted using exchangeRate before saving; enteredCurrency records what was
 // originally typed in.
@@ -69,16 +70,22 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+
+    // _sheet lets a page target its own tab (e.g. "Incoming"); defaults to the
+    // outgoing Cost Breakdown tab. It's a control field, not a stored column.
+    var sheetName = data._sheet || SHEET_NAME;
+    delete data._sheet;
+    var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
 
     // When _updateRow is present, overwrite that existing row instead of
     // appending a new one. It's a control field, not a column to store.
     var updateRow = data._updateRow;
     delete data._updateRow;
 
-    // Write the header row the first time the sheet is used.
+    // Write the header row (from this record's keys) the first time the tab is
+    // used, so each tab gets headers matching the data it actually receives.
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(HEADERS);
+      sheet.appendRow(Object.keys(data));
     }
 
     // Map values by header NAME (not fixed order) so rows stay aligned even if
@@ -113,8 +120,9 @@ function doPost(e) {
 // the browser can read it cross-origin (plain GET is blocked by CORS).
 function doGet(e) {
   var callback = e && e.parameter ? e.parameter.callback : null;
+  var sheetName = (e && e.parameter && e.parameter.sheet) || SHEET_NAME;
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
     var records = [];
     if (sheet && sheet.getLastRow() > 1) {
       var values = sheet.getDataRange().getValues();

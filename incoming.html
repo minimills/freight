@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freight Cost Breakdown</title>
+<title>Incoming Shipments</title>
 <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
@@ -16,8 +16,8 @@
     </div>
     <ul class="navbar-links">
       <li><a href="index.html">Dashboard</a></li>
-      <li><a href="freight.html" class="active">Cost Breakdown</a></li>
-      <li><a href="incoming.html">Incoming</a></li>
+      <li><a href="freight.html">Cost Breakdown</a></li>
+      <li><a href="incoming.html" class="active">Incoming</a></li>
       <li><a href="convert.html">Unit Converter</a></li>
       <li><a href="email.html">Email Agent</a></li>
     </ul>
@@ -25,8 +25,8 @@
 
   <div class="app">
     <header class="app-header">
-      <h1>Freight Cost Breakdown</h1>
-      <p class="subtitle">Calculate margin and cost breakdown for freight invoices</p>
+      <h1>Incoming Shipments</h1>
+      <p class="subtitle">Track incoming shipment costs and store them for reference</p>
     </header>
 
     <main class="layout">
@@ -40,11 +40,6 @@
             </select>
           </div>
           <div class="field">
-            <label for="invoiceTotal">Total Amount on Invoice</label>
-            <input type="text" inputmode="decimal" id="invoiceTotal" placeholder="e.g. 123+123">
-            <span class="calc-hint" id="invoiceTotalHint"></span>
-          </div>
-          <div class="field">
             <label for="freightType">Freight Type</label>
             <select id="freightType">
               <option value="LTL">LTL</option>
@@ -52,6 +47,22 @@
               <option value="LCL">LCL</option>
               <option value="FCL">FCL</option>
               <option value="Air">Air</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="incoterms">Incoterms</label>
+            <select id="incoterms">
+              <option value="EXW">EXW — Ex Works</option>
+              <option value="FCA">FCA — Free Carrier</option>
+              <option value="FAS">FAS — Free Alongside Ship</option>
+              <option value="FOB">FOB — Free On Board</option>
+              <option value="CFR">CFR — Cost and Freight</option>
+              <option value="CIF">CIF — Cost, Insurance and Freight</option>
+              <option value="CPT">CPT — Carriage Paid To</option>
+              <option value="CIP">CIP — Carriage and Insurance Paid To</option>
+              <option value="DAP">DAP — Delivered At Place</option>
+              <option value="DPU">DPU — Delivered At Place Unloaded</option>
+              <option value="DDP">DDP — Delivered Duty Paid</option>
             </select>
           </div>
           <div class="field" id="exchangeRateField" hidden>
@@ -65,16 +76,12 @@
         <h2 class="section-title">Reference Info</h2>
         <section class="field-group">
           <div class="field">
-            <label for="shipDate">Ship Date (picked up)</label>
-            <input type="date" id="shipDate">
+            <label for="dateReceived">Date Received</label>
+            <input type="date" id="dateReceived">
           </div>
           <div class="field">
-            <label for="customerName">Customer Name</label>
-            <input type="text" id="customerName" placeholder="Customer name">
-          </div>
-          <div class="field">
-            <label for="quoteNumber">Quote #</label>
-            <input type="text" id="quoteNumber" placeholder="Quote #">
+            <label for="supplierName">Supplier Name</label>
+            <input type="text" id="supplierName" placeholder="Supplier name">
           </div>
           <div class="field">
             <label for="invoiceNumber">Invoice #</label>
@@ -85,32 +92,14 @@
             <input type="text" id="refNumber" placeholder="Ref #">
           </div>
           <div class="field">
-            <label for="carrier">Shipping Company</label>
-            <select id="carrier">
-              <option value="Livingston">Livingston</option>
-              <option value="FedEx">FedEx</option>
-              <option value="UPS">UPS</option>
-              <option value="Purolator">Purolator</option>
-              <option value="Canada Post">Canada Post</option>
-              <option value="Day &amp; Ross">Day &amp; Ross</option>
-              <option value="DHL">DHL</option>
-              <option value="new">Add new…</option>
-            </select>
-          </div>
-          <div class="field" id="carrierNewField" hidden>
-            <label for="carrierNew">New Carrier Name</label>
-            <input type="text" id="carrierNew" placeholder="Carrier name">
-          </div>
-          <div class="field" id="subContractorField">
-            <label for="subContractor">Sub-contractor Carrier</label>
-            <input type="text" id="subContractor" placeholder="Actual carrier used">
+            <label for="shippingCompany">Shipping Company</label>
+            <input type="text" id="shippingCompany" placeholder="Shipping company">
           </div>
         </section>
 
         <hr class="divider">
 
         <h2 class="section-title">Breakdown</h2>
-
         <section class="field-group three-col">
           <div class="field">
             <label for="cargoValue">Total Cargo Value</label>
@@ -134,37 +123,9 @@
               </label>
             </div>
           </div>
-        </section>
-
-        <h3 class="subsection-title">Handling</h3>
-        <section class="field-group three-col">
           <div class="field">
-            <label for="hourlyRate">Hourly Rate</label>
-            <input type="number" id="hourlyRate" min="0" step="0.01" placeholder="65">
-          </div>
-          <div class="field">
-            <label for="hours">Hours</label>
-            <input type="number" id="hours" min="0" step="0.25" placeholder="0">
-          </div>
-          <div class="field">
-            <label for="plywoodRate">Plywood Rate</label>
-            <input type="number" id="plywoodRate" min="0" step="0.01" placeholder="65">
-          </div>
-          <div class="field">
-            <label for="plywoodSheets"># of Plywood Sheets</label>
-            <input type="number" id="plywoodSheets" min="0" step="1" placeholder="0">
-          </div>
-        </section>
-
-        <section class="field-group">
-          <div class="field">
-            <label for="margin">Margin (%)</label>
-            <input type="number" id="margin" min="0" step="0.1" placeholder="0">
-            <div class="quick-buttons">
-              <button type="button" class="margin-btn" data-value="10">10%</button>
-              <button type="button" class="margin-btn" data-value="20">20%</button>
-              <button type="button" class="margin-btn" data-value="30">30%</button>
-            </div>
+            <label for="taxes">Taxes</label>
+            <input type="number" id="taxes" min="0" step="0.01" placeholder="0.00">
           </div>
         </section>
 
@@ -198,41 +159,15 @@
             <span id="r-brokerFees">$0.00</span>
           </div>
           <div class="result-row">
-            <span>Handling</span>
-            <span id="r-handling">$0.00</span>
-          </div>
-          <div class="result-row subtotal">
-            <span>Subtotal</span>
-            <span id="r-subtotal">$0.00</span>
-          </div>
-          <div class="result-row sub-note">
-            <span>Freight Subtotal (excl. cargo value)</span>
-            <span class="value-with-copy">
-              <span id="r-freightSubtotal">$0.00</span>
-              <button type="button" class="copy-btn" data-copy-target="r-freightSubtotal" title="Copy value">⧉</button>
-            </span>
+            <span>Taxes</span>
+            <span id="r-taxes">$0.00</span>
           </div>
           <div class="result-row total">
             <span>Total Breakdown Cost</span>
-            <span id="r-breakdownTotal">$0.00</span>
-          </div>
-          <div class="result-row sub-note">
-            <span>Total Breakdown Cost + Margin (<span id="r-marginPct2">0</span>%) — Total Income</span>
             <span class="value-with-copy">
-              <span id="r-totalIncome">$0.00</span>
-              <button type="button" class="copy-btn" data-copy-target="r-totalIncome" title="Copy value">⧉</button>
+              <span id="r-subtotal">$0.00</span>
+              <button type="button" class="copy-btn" data-copy-target="r-subtotal" title="Copy value">⧉</button>
             </span>
-          </div>
-          <div class="result-row sub-note">
-            <span>Freight Subtotal + Margin (<span id="r-marginPct">0</span>%)</span>
-            <span class="value-with-copy">
-              <span id="r-freightChargeable">$0.00</span>
-              <button type="button" class="copy-btn" data-copy-target="r-freightChargeable" title="Copy value">⧉</button>
-            </span>
-          </div>
-          <div class="result-row diff" id="r-diffRow">
-            <span>Invoice − Breakdown Cost</span>
-            <span id="r-diff">$0.00</span>
           </div>
         </section>
       </section>
@@ -244,15 +179,15 @@
   <div id="loadModal" class="modal-overlay" hidden>
     <div class="modal">
       <div class="modal-header">
-        <h2>Load Saved Record</h2>
+        <h2>Load Saved Incoming Shipment</h2>
         <button type="button" id="loadCloseBtn" class="modal-close" title="Close">×</button>
       </div>
-      <input type="text" id="loadSearch" class="modal-search" placeholder="Search by customer, ref #, invoice #, quote #…">
+      <input type="text" id="loadSearch" class="modal-search" placeholder="Search by supplier, ref #, invoice #…">
       <div id="loadList" class="load-list"></div>
       <p class="save-status" id="loadStatus"></p>
     </div>
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script src="incoming.js?v=1"></script>
 </body>
 </html>

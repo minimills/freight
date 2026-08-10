@@ -28,6 +28,12 @@
 // Tab name to write to. Change if your tab isn't called "Sheet1".
 var SHEET_NAME = "Sheet1";
 
+// Bump this whenever you change the script, then open the /exec URL in a
+// browser after redeploying: the "version" it prints must match this value.
+// If it doesn't, the live deployment is still running old code — redeploy with
+// a NEW VERSION (Deploy > Manage deployments > edit > Version: New version).
+var VERSION = "2024-06-phase2-sheet-routing";
+
 // Reference only: the columns the outgoing Cost Breakdown page sends. Each tab
 // now gets its header row from the keys of the first record it receives, so
 // this list is documentation, not the source of truth.
@@ -136,7 +142,7 @@ function doGet(e) {
         records.push(obj);
       }
     }
-    return respond({ ok: true, records: records }, callback);
+    return respond({ ok: true, version: VERSION, sheet: sheetName, records: records }, callback);
   } catch (err) {
     return respond({ ok: false, error: String(err) }, callback);
   }

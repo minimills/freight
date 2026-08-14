@@ -3,7 +3,7 @@ const RATES = { CAD: 65, USD: 50 };
 // Google Sheets logging. Deploy the Apps Script in google-apps-script.gs as a
 // Web App ("Anyone" access) and paste its /exec URL below to enable "Save Data".
 // While blank, the Save Data button shows setup instructions instead.
-const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycby2vI9bjOGSOsNSMsDPt1hcQaVZy2KEVDgGZ1WYiZTPqpLRTbJSpir0IqOJLY4uv-zfMQ/exec";
+const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwC1qgkmQgtp8C-fu8l96Ifa_1DeO2xdO8jopol271u_vbhJIQuNutPswHJR4432WZM/exec";
 
 const ids = [
   "currency", "invoiceTotal", "freightType", "exchangeRate", "shipDate", "customerName", "quoteNumber",
